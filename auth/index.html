@@ -20,13 +20,12 @@
       background: #1e293b;
       border-radius: 12px;
       padding: 2.5rem;
-      max-width: 420px;
+      max-width: 540px;
       width: 100%;
-      text-align: center;
       box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
     }
-    .card h1 { font-size: 1.5rem; margin-bottom: 0.75rem; }
-    .card p { color: #94a3b8; margin-bottom: 1.5rem; line-height: 1.5; }
+    .card h1 { font-size: 1.5rem; margin-bottom: 0.5rem; text-align: center; }
+    .card p { color: #94a3b8; margin-bottom: 1.5rem; text-align: center; line-height: 1.5; }
     .btn {
       display: inline-flex;
       align-items: center;
@@ -40,13 +39,13 @@
       font-weight: 600;
       cursor: pointer;
       transition: background 0.2s;
+      width: 100%;
+      justify-content: center;
     }
     .btn:hover { background: #2563eb; }
     .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-    .btn-secondary { background: #475569; }
-    .btn-secondary:hover { background: #334155; }
     .status {
-      margin-top: 1.5rem;
+      margin-top: 1rem;
       padding: 0.75rem;
       border-radius: 8px;
       font-size: 0.875rem;
@@ -54,36 +53,38 @@
     }
     .status.success { display: block; background: #065f46; color: #a7f3d0; }
     .status.error { display: block; background: #7f1d1d; color: #fecaca; }
-    .debug-panel {
-      display: none;
-      margin-top: 1rem;
-      text-align: left;
-    }
-    .debug-panel.visible { display: block; }
-    .debug-panel h2 {
-      font-size: 0.875rem;
-      margin-bottom: 0.5rem;
-      color: #cbd5e1;
-    }
-    .debug-panel pre {
-      max-height: 240px;
+    .status.info { display: block; background: #1e3a5f; color: #bfdbfe; }
+    .result-panel { display: none; margin-top: 1rem; }
+    .result-panel.visible { display: block; }
+    .result-panel .step { color: #94a3b8; margin-bottom: 0.5rem; font-size: 0.875rem; }
+    .result-panel pre {
+      max-height: 360px;
       overflow: auto;
       white-space: pre-wrap;
       word-break: break-word;
       background: #020617;
       border: 1px solid #334155;
       border-radius: 8px;
-      padding: 0.75rem;
+      padding: 1rem;
       color: #cbd5e1;
       font-size: 0.75rem;
       line-height: 1.45;
+      user-select: all;
     }
+    .copy-btn {
+      margin-top: 0.75rem;
+      background: #475569;
+    }
+    .copy-btn:hover { background: #334155; }
+    .copy-btn.copied { background: #065f46; }
   </style>
 </head>
 <body>
   <div class="card">
     <h1>Connect DeSo Wallet</h1>
-    <p id="introText">Connect your DeSo wallet. In n8n mode, the returned auth material is stored as an encrypted credential. Local debug mode only shows masked field status.</p>
+    <p id="introText">
+      Connect your DeSo wallet, then copy the credential payload into n8n.
+    </p>
 
     <button id="connectBtn" class="btn" type="button">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 9h-6a2 2 0 0 0-2 2v2a2 2 0 0 0 2 2h6"/><circle cx="17" cy="13" r="2"/></svg>
@@ -91,16 +92,26 @@
     </button>
 
     <div id="status" class="status"></div>
-    <div id="debugPanel" class="debug-panel">
-      <h2>Credential status</h2>
-      <pre id="debugPayload"></pre>
+
+    <div id="resultPanel" class="result-panel">
+      <p class="step">1. Copy the payload below (<strong>Ctrl+C</strong> or tap Copy button):</p>
+      <pre id="payloadDisplay"></pre>
+      <button id="copyBtn" class="btn copy-btn" type="button">
+        📋 Copy to Clipboard
+      </button>
+      <p class="step" style="margin-top: 1rem;">
+        2. Go back to n8n and paste it into the <strong>DeSo Auth Page</strong> field in your credential.
+      </p>
+      <p class="step">
+        3. The remaining credential fields will populate automatically.
+      </p>
     </div>
   </div>
 
   <script src="deso-protocol.bundle.js"></script>
   <script>
-    // esbuild's IIFE bundle exposes DeSo Protocol on the global `deso` var.
     const desoClient = globalThis.deso;
+    let currentPayload = null;
 
     function showStatus(message, type) {
       const el = document.getElementById('status');
@@ -108,48 +119,27 @@
       el.textContent = message;
     }
 
-    function setIntroText(message) {
-      document.getElementById('introText').textContent = message;
-    }
-
-    function maskValue(value) {
-      if (value === null || value === undefined || value === '') {
-        return '';
-      }
-
-      const text = String(value);
-      if (text.length <= 12) {
-        return '[present]';
-      }
-
-      return text.slice(0, 6) + '...' + text.slice(-4) + ` (${text.length} chars)`;
-    }
-
-    function maskPayload(payload) {
-      return Object.fromEntries(
-        Object.entries(payload).map(([key, value]) => [key, maskValue(value)])
-      );
-    }
-
-    function showDebugPayload(payload) {
-      const panel = document.getElementById('debugPanel');
-      const pre = document.getElementById('debugPayload');
-      pre.textContent = JSON.stringify(maskPayload(payload), null, 2);
+    function showPayload(payload) {
+      currentPayload = payload;
+      const panel = document.getElementById('resultPanel');
+      const pre = document.getElementById('payloadDisplay');
+      pre.textContent = JSON.stringify(payload, null, 2);
       panel.classList.add('visible');
+      document.getElementById('introText').textContent =
+        'Wallet connected. Copy the credential payload and paste it into n8n.';
+      document.getElementById('connectBtn').style.display = 'none';
     }
 
     async function connectWallet() {
       const btn = document.getElementById('connectBtn');
       btn.disabled = true;
       btn.textContent = 'Connecting...';
-      setIntroText('Opening DeSo Identity. Complete the wallet prompt in the popup window.');
 
       try {
         if (!desoClient) {
           throw new Error('DeSo Protocol bundle did not load. Refresh and try again.');
         }
 
-        // Configure deso-protocol
         desoClient.configure({
           nodeURI: 'https://node.deso.org',
           spendingLimitOptions: {
@@ -160,14 +150,12 @@
           },
         });
 
-        // Open DeSo Identity popup
         const user = await desoClient.identity.login();
 
         if (!user || !user.publicKeyAdded) {
           throw new Error('Login did not return a public key. Please try again.');
         }
 
-        // Get JWT if not on the login response
         let jwt = user.jwt;
         if (!jwt) {
           try {
@@ -177,7 +165,6 @@
           }
         }
 
-        // Fetch profile for username
         let username = '';
         try {
           const res = await fetch('https://node.deso.org/api/v0/get-users-stateless', {
@@ -195,7 +182,6 @@
           console.warn('Failed to fetch profile:', e);
         }
 
-        // Build credential data for the n8n callback.
         const activePublicKey = window.localStorage.getItem('desoActivePublicKey') || user.publicKeyAdded;
         const identityUsers = window.localStorage.getItem('desoIdentityUsers') || '';
         const loginKeyPair = window.localStorage.getItem('desoLoginKeyPair') || '';
@@ -220,47 +206,41 @@
           profileUsername: username,
         };
 
-        showStatus('Wallet connected! Saving credentials...', 'success');
-
-        // Post back to n8n callback
-        // The callback URL is passed via query param from the credential setup
-        const params = new URLSearchParams(window.location.search);
-        const callbackUrl = params.get('callback');
-
-        if (!callbackUrl) {
-          showDebugPayload(payload);
-          setIntroText('DeSo Identity authorization completed, but n8n did not provide a credential callback URL.');
-          showStatus('Credential callback URL missing. Reopen this page from the n8n credential setup.', 'error');
-          btn.disabled = false;
-          btn.textContent = 'Connect DeSo Wallet';
-          return;
-        }
-
-        const callbackRes = await fetch(callbackUrl, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
-        });
-
-        if (!callbackRes.ok) {
-          const errText = await callbackRes.text();
-          throw new Error('Failed to save credentials: ' + errText);
-        }
-
-        showStatus('Credentials saved successfully! You can close this window.', 'success');
-        setIntroText('DeSo Identity authorization completed and the credential callback succeeded.');
-        btn.style.display = 'none';
+        showStatus('Wallet connected!', 'success');
+        showPayload(payload);
 
       } catch (error) {
         const msg = error instanceof Error ? error.message : 'Unknown error';
         showStatus(msg, 'error');
-        setIntroText('Connection did not complete. You can try again.');
         btn.disabled = false;
         btn.textContent = 'Connect DeSo Wallet';
       }
     }
 
     document.getElementById('connectBtn').addEventListener('click', connectWallet);
+
+    document.getElementById('copyBtn').addEventListener('click', async () => {
+      if (!currentPayload) return;
+      try {
+        await navigator.clipboard.writeText(JSON.stringify(currentPayload, null, 2));
+        const btn = document.getElementById('copyBtn');
+        btn.textContent = '✅ Copied!';
+        btn.classList.add('copied');
+        setTimeout(() => {
+          btn.textContent = '📋 Copy to Clipboard';
+          btn.classList.remove('copied');
+        }, 2000);
+      } catch {
+        // Fallback for non-HTTPS or older browsers
+        const pre = document.getElementById('payloadDisplay');
+        const range = document.createRange();
+        range.selectNodeContents(pre);
+        const selection = window.getSelection();
+        selection.removeAllRanges();
+        selection.addRange(range);
+        showStatus('Select the payload text and copy manually (Ctrl+C)', 'info');
+      }
+    });
   </script>
 </body>
 </html>

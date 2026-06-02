@@ -5,6 +5,8 @@ export const DEFAULT_NODE_URI = 'https://node.deso.org';
 const DEFAULT_MIN_FEE_RATE_NANOS_PER_KB = 1000;
 
 export interface DesoCredentials {
+  /** Full JSON payload from the DeSo Auth Page — paste into this one field and it populates the rest */
+  credentialPayload?: string;
   nodeUri?: string;
   publicKey?: string;
   jwt?: string;
@@ -12,6 +14,31 @@ export interface DesoCredentials {
   identityStorageJson?: string;
   spendingLimitNanos?: number;
   profileUsername?: string;
+}
+
+/**
+ * Resolve credential data from either the `credentialPayload` field (full JSON blob
+ * pasted from the DeSo Auth Page) or from individual fields. If `credentialPayload`
+ * is present and valid, it takes precedence.
+ */
+export function resolveCredentials(raw: DesoCredentials): DesoCredentials {
+  if (raw.credentialPayload) {
+    try {
+      const parsed = JSON.parse(raw.credentialPayload) as DesoCredentials & DesoAuthPayload;
+      // Merge parsed values over raw ones, preserving nodeUri and spendingLimit
+      return {
+        ...raw,
+        publicKey: parsed.publicKey || raw.publicKey,
+        jwt: parsed.jwt || raw.jwt,
+        derivedKey: parsed.derivedKey || raw.derivedKey,
+        identityStorageJson: parsed.identityStorageJson || raw.identityStorageJson,
+        profileUsername: parsed.profileUsername || raw.profileUsername,
+      };
+    } catch {
+      // If the payload is invalid JSON, fall through to individual fields
+    }
+  }
+  return raw;
 }
 
 export interface DesoIdentityStorageBundle {
@@ -74,7 +101,8 @@ export function parseIdentityStorageBundle(value?: string): DesoIdentityStorageB
   };
 }
 
-export function getCredentialPublicKey(credentials: DesoCredentials): string {
+export function getCredentialPublicKey(raw: DesoCredentials): string {
+  const credentials = resolveCredentials(raw);
   const storage = parseIdentityStorageBundle(credentials.identityStorageJson);
   const publicKey = credentials.publicKey || storage.desoActivePublicKey;
 
@@ -86,9 +114,10 @@ export function getCredentialPublicKey(credentials: DesoCredentials): string {
 }
 
 export async function uploadImageToDeso(
-  credentials: DesoCredentials,
+  raw: DesoCredentials,
   image: { data: Buffer; fileName: string; mimeType?: string },
 ): Promise<string> {
+  const credentials = resolveCredentials(raw);
   const publicKey = getCredentialPublicKey(credentials);
   const nodeURI = credentials.nodeUri || DEFAULT_NODE_URI;
 
@@ -121,12 +150,13 @@ export async function uploadImageToDeso(
   return responseBody.ImageURL;
 }
 
-export async function postToDeso(credentials: DesoCredentials, input: PostToDesoInput): Promise<Record<string, unknown>> {
+export async function postToDeso(raw: DesoCredentials, input: PostToDesoInput): Promise<Record<string, unknown>> {
   const body = input.body.trim();
   if (!body) {
     throw new Error('Post body cannot be empty.');
   }
 
+  const credentials = resolveCredentials(raw);
   const nodeURI = credentials.nodeUri || DEFAULT_NODE_URI;
   const publicKey = getCredentialPublicKey(credentials);
 
@@ -163,9 +193,10 @@ export async function postToDeso(credentials: DesoCredentials, input: PostToDeso
 }
 
 export async function getDesoProfile(
-  credentials: DesoCredentials,
+  raw: DesoCredentials,
   input: GetDesoProfileInput = {},
 ): Promise<Record<string, unknown>> {
+  const credentials = resolveCredentials(raw);
   const nodeURI = credentials.nodeUri || DEFAULT_NODE_URI;
   const target = (input.user || '').trim();
   const credentialPublicKey = getCredentialPublicKey(credentials);
@@ -200,7 +231,8 @@ export async function getDesoProfile(
   };
 }
 
-export function configureForCredential(credentials: DesoCredentials): void {
+export function configureForCredential(raw: DesoCredentials): void {
+  const credentials = resolveCredentials(raw);
   installBrowserBase64Shim();
 
   const nodeURI = credentials.nodeUri || DEFAULT_NODE_URI;

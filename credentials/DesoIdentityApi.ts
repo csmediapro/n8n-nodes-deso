@@ -1,8 +1,6 @@
 import type {
   ICredentialType,
   INodeProperties,
-  ICredentialDataDecryptedObject,
-  IDataObject,
 } from 'n8n-workflow';
 
 export class DesoIdentityApi implements ICredentialType {
@@ -14,11 +12,27 @@ export class DesoIdentityApi implements ICredentialType {
 
   properties: INodeProperties[] = [
     {
-      displayName: 'Node URL',
-      name: 'nodeUri',
+      displayName: 'Open the DeSo Auth Page in your browser, connect your wallet, then paste the credential payload here.',
+      name: 'notice',
+      type: 'notice',
+      default: '',
+    },
+    {
+      displayName: 'Auth Page URL',
+      name: 'authPageUrl',
       type: 'string',
-      default: 'https://node.deso.org',
-      description: 'DeSo blockchain node to connect to',
+      default: 'https://csmediapro.github.io/n8n-nodes-deso/auth/',
+      description: 'Open this URL in a browser with the DeSo Identity extension',
+    },
+    {
+      displayName: 'Credential Payload',
+      name: 'credentialPayload',
+      type: 'string',
+      typeOptions: {
+        rows: 8,
+      },
+      default: '',
+      description: 'Paste the full credential payload from the DeSo Auth Page',
     },
     {
       displayName: 'Public Key',
@@ -28,7 +42,7 @@ export class DesoIdentityApi implements ICredentialType {
         password: true,
       },
       default: '',
-      description: 'Your DeSo public key (set automatically via Connect DeSo Wallet)',
+      description: 'Your DeSo public key',
     },
     {
       displayName: 'JWT',
@@ -36,9 +50,10 @@ export class DesoIdentityApi implements ICredentialType {
       type: 'string',
       typeOptions: {
         password: true,
+        alwaysOpenEditWindow: true,
       },
       default: '',
-      description: 'JWT token from DeSo Identity (set automatically via Connect DeSo Wallet)',
+      description: 'JWT token from DeSo Identity',
     },
     {
       displayName: 'Derived Key',
@@ -48,7 +63,7 @@ export class DesoIdentityApi implements ICredentialType {
         password: true,
       },
       default: '',
-      description: 'Derived key for signing transactions (set automatically via Connect DeSo Wallet)',
+      description: 'Derived key for signing transactions',
     },
     {
       displayName: 'DeSo Identity Storage',
@@ -59,7 +74,14 @@ export class DesoIdentityApi implements ICredentialType {
         rows: 4,
       },
       default: '',
-      description: 'Encrypted DeSo Identity authorization data populated by Connect DeSo Wallet.',
+      description: 'DeSo Identity authorization data',
+    },
+    {
+      displayName: 'Node URL',
+      name: 'nodeUri',
+      type: 'string',
+      default: 'https://node.deso.org',
+      description: 'DeSo blockchain node to connect to',
     },
     {
       displayName: 'Spending Limit (Nanos)',
@@ -73,25 +95,7 @@ export class DesoIdentityApi implements ICredentialType {
       name: 'profileUsername',
       type: 'string',
       default: '',
-      description: 'Your DeSo username (set automatically after connecting wallet)',
+      description: 'Your DeSo username',
     },
   ];
-
-  /**
-   * Called when user clicks "Connect DeSo Wallet" in the credential UI.
-   * Returns auth metadata for the self-hosted auth page that handles the
-   * DeSo Identity popup flow and posts the result back.
-   *
-   * The auth page is served from the node's static auth/ directory
-   * via a route registered on the n8n Express app.
-   */
-  async preAuthentication(this: any, _credentials: ICredentialDataDecryptedObject): Promise<IDataObject> {
-    // Return the auth page URL relative to this n8n instance.
-    // The route /rest/deso-auth/index.html is registered by the node
-    // when it initializes.
-    // TODO: Register the route and verify this URL resolves correctly.
-    return {
-      authUrl: '/rest/deso-auth/index.html',
-    };
-  }
 }

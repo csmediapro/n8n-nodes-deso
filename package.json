@@ -29,7 +29,8 @@
   "types": "dist/index.d.ts",
   "files": [
     "dist",
-    "auth"
+    "auth",
+    "logo.svg"
   ],
   "n8n": {
     "n8nNodesApiVersion": 1,

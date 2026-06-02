@@ -10,7 +10,7 @@ export class Deso implements INodeType {
   description: INodeTypeDescription = {
     displayName: 'DeSo',
     name: 'deso',
-    icon: 'file:deso.svg',
+    icon: 'file:logo.svg',
     group: ['output'],
     version: 1,
     subtitle: '={{$parameter["operation"]}}',
