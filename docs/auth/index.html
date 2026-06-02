@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Connect DeSo Wallet — n8n</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0f172a;
+      color: #e2e8f0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 2rem;
+    }
+    .card {
+      background: #1e293b;
+      border-radius: 12px;
+      padding: 2.5rem;
+      max-width: 540px;
+      width: 100%;
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+    }
+    .card h1 { font-size: 1.5rem; margin-bottom: 0.5rem; text-align: center; }
+    .card p { color: #94a3b8; margin-bottom: 1.5rem; text-align: center; line-height: 1.5; }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: #3b82f6;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 0.75rem 1.5rem;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+      width: 100%;
+      justify-content: center;
+    }
+    .btn:hover { background: #2563eb; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .status {
+      margin-top: 1rem;
+      padding: 0.75rem;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      display: none;
+    }
+    .status.success { display: block; background: #065f46; color: #a7f3d0; }
+    .status.error { display: block; background: #7f1d1d; color: #fecaca; }
+    .status.info { display: block; background: #1e3a5f; color: #bfdbfe; }
+    .result-panel { display: none; margin-top: 1rem; }
+    .result-panel.visible { display: block; }
+    .result-panel .step { color: #94a3b8; margin-bottom: 0.5rem; font-size: 0.875rem; }
+    .result-panel pre {
+      max-height: 360px;
+      overflow: auto;
+      white-space: pre-wrap;
+      word-break: break-word;
+      background: #020617;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      padding: 1rem;
+      color: #cbd5e1;
+      font-size: 0.75rem;
+      line-height: 1.45;
+      user-select: all;
+    }
+    .copy-btn {
+      margin-top: 0.75rem;
+      background: #475569;
+    }
+    .copy-btn:hover { background: #334155; }
+    .copy-btn.copied { background: #065f46; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Connect DeSo Wallet</h1>
+    <p id="introText">
+      Connect your DeSo wallet, then copy the credential payload into n8n.
+    </p>
+
+    <button id="connectBtn" class="btn" type="button">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 9h-6a2 2 0 0 0-2 2v2a2 2 0 0 0 2 2h6"/><circle cx="17" cy="13" r="2"/></svg>
+      Connect DeSo Wallet
+    </button>
+
+    <div id="status" class="status"></div>
+
+    <div id="resultPanel" class="result-panel">
+      <p class="step">1. Copy the payload below (<strong>Ctrl+C</strong> or tap Copy button):</p>
+      <pre id="payloadDisplay"></pre>
+      <button id="copyBtn" class="btn copy-btn" type="button">
+        📋 Copy to Clipboard
+      </button>
+      <p class="step" style="margin-top: 1rem;">
+        2. Go back to n8n and paste it into the <strong>DeSo Auth Page</strong> field in your credential.
+      </p>
+      <p class="step">
+        3. The remaining credential fields will populate automatically.
+      </p>
+    </div>
+  </div>
+
+  <script src="deso-protocol.bundle.js"></script>
+  <script>
+    const desoClient = globalThis.deso;
+    let currentPayload = null;
+
+    function showStatus(message, type) {
+      const el = document.getElementById('status');
+      el.className = 'status ' + type;
+      el.textContent = message;
+    }
+
+    function showPayload(payload) {
+      currentPayload = payload;
+      const panel = document.getElementById('resultPanel');
+      const pre = document.getElementById('payloadDisplay');
+      pre.textContent = JSON.stringify(payload, null, 2);
+      panel.classList.add('visible');
+      document.getElementById('introText').textContent =
+        'Wallet connected. Copy the credential payload and paste it into n8n.';
+      document.getElementById('connectBtn').style.display = 'none';
+    }
+
+    async function connectWallet() {
+      const btn = document.getElementById('connectBtn');
+      btn.disabled = true;
+      btn.textContent = 'Connecting...';
+
+      try {
+        if (!desoClient) {
+          throw new Error('DeSo Protocol bundle did not load. Refresh and try again.');
+        }
+
+        desoClient.configure({
+          nodeURI: 'https://node.deso.org',
+          spendingLimitOptions: {
+            GlobalDESOLimit: 10000000,
+            TransactionCountLimitMap: {
+              SUBMIT_POST: 'UNLIMITED',
+            },
+          },
+        });
+
+        const user = await desoClient.identity.login();
+
+        if (!user || !user.publicKeyAdded) {
+          throw new Error('Login did not return a public key. Please try again.');
+        }
+
+        let jwt = user.jwt;
+        if (!jwt) {
+          try {
+            jwt = await desoClient.identity.jwt();
+          } catch (e) {
+            console.warn('Failed to retrieve JWT:', e);
+          }
+        }
+
+        let username = '';
+        try {
+          const res = await fetch('https://node.deso.org/api/v0/get-users-stateless', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ PublicKeysBase58Check: [user.publicKeyAdded] }),
+          });
+          if (res.ok) {
+            const data = await res.json();
+            if (data.UserList?.[0]) {
+              username = data.UserList[0].ProfileEntryResponse?.Username || '';
+            }
+          }
+        } catch (e) {
+          console.warn('Failed to fetch profile:', e);
+        }
+
+        const activePublicKey = window.localStorage.getItem('desoActivePublicKey') || user.publicKeyAdded;
+        const identityUsers = window.localStorage.getItem('desoIdentityUsers') || '';
+        const loginKeyPair = window.localStorage.getItem('desoLoginKeyPair') || '';
+        let primaryDerivedKey = null;
+
+        try {
+          const users = identityUsers ? JSON.parse(identityUsers) : {};
+          primaryDerivedKey = users[user.publicKeyAdded]?.primaryDerivedKey || null;
+        } catch (e) {
+          console.warn('Failed to parse DeSo Identity users from localStorage:', e);
+        }
+
+        const payload = {
+          publicKey: user.publicKeyAdded,
+          jwt: jwt || '',
+          derivedKey: primaryDerivedKey?.derivedPublicKeyBase58Check || user.derivedPublicKeyBase58Check || user.derivedKey || '',
+          identityStorageJson: JSON.stringify({
+            desoActivePublicKey: activePublicKey,
+            desoIdentityUsers: identityUsers,
+            desoLoginKeyPair: loginKeyPair,
+          }),
+          profileUsername: username,
+        };
+
+        showStatus('Wallet connected!', 'success');
+        showPayload(payload);
+
+      } catch (error) {
+        const msg = error instanceof Error ? error.message : 'Unknown error';
+        showStatus(msg, 'error');
+        btn.disabled = false;
+        btn.textContent = 'Connect DeSo Wallet';
+      }
+    }
+
+    document.getElementById('connectBtn').addEventListener('click', connectWallet);
+
+    document.getElementById('copyBtn').addEventListener('click', async () => {
+      if (!currentPayload) return;
+      try {
+        await navigator.clipboard.writeText(JSON.stringify(currentPayload, null, 2));
+        const btn = document.getElementById('copyBtn');
+        btn.textContent = '✅ Copied!';
+        btn.classList.add('copied');
+        setTimeout(() => {
+          btn.textContent = '📋 Copy to Clipboard';
+          btn.classList.remove('copied');
+        }, 2000);
+      } catch {
+        // Fallback for non-HTTPS or older browsers
+        const pre = document.getElementById('payloadDisplay');
+        const range = document.createRange();
+        range.selectNodeContents(pre);
+        const selection = window.getSelection();
+        selection.removeAllRanges();
+        selection.addRange(range);
+        showStatus('Select the payload text and copy manually (Ctrl+C)', 'info');
+      }
+    });
+  </script>
+</body>
+</html>
