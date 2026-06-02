@@ -1,0 +1,8 @@
+node_modules/
+dist/
+.env
+*.tgz
+*.js.map
+.DS_Store
+.deso-storage/
+auth/deso-protocol.bundle.js

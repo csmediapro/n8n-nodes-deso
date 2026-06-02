@@ -1,0 +1,66 @@
+{
+  "name": "n8n-nodes-deso",
+  "version": "0.1.0",
+  "description": "n8n community node for DeSo Identity authentication, image posting, and profile lookup",
+  "keywords": [
+    "n8n-community-node-package",
+    "deso",
+    "deso-identity",
+    "deso-protocol",
+    "blockchain",
+    "decentralized-social",
+    "automation",
+    "social-media"
+  ],
+  "license": "MIT",
+  "author": {
+    "name": "CSMediaPro",
+    "url": "https://csmediapro.com"
+  },
+  "homepage": "https://csmediapro.com",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/csmediapro/n8n-nodes-deso.git"
+  },
+  "bugs": {
+    "url": "https://github.com/csmediapro/n8n-nodes-deso/issues"
+  },
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "auth"
+  ],
+  "n8n": {
+    "n8nNodesApiVersion": 1,
+    "credentials": [
+      "dist/credentials/DesoIdentityApi.js"
+    ],
+    "nodes": [
+      "dist/nodes/Deso/Deso.node.js"
+    ]
+  },
+  "scripts": {
+    "build": "tsc",
+    "bundle-auth": "esbuild node_modules/deso-protocol/src/index.js --bundle --format=iife --global-name=deso --platform=browser --outfile=auth/deso-protocol.bundle.js",
+    "dev": "tsc --watch",
+    "lint": "eslint credentials nodes src --ext .ts",
+    "test:profile": "npm run build && node scripts/test-operations.js",
+    "test:post": "npm run build && node scripts/test-operations.js --post",
+    "test:image-post": "npm run build && node scripts/test-operations.js --post --image",
+    "prepublishOnly": "npm run build"
+  },
+  "dependencies": {
+    "deso-protocol": "^3.3.7",
+    "n8n-workflow": "^1.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.5.5",
+    "typescript": "^5.5.3",
+    "n8n-core": "^1.0.0"
+  },
+  "peerDependencies": {
+    "n8n-core": "^1.0.0",
+    "n8n-workflow": "^1.0.0"
+  }
+}
