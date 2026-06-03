@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>n8n-nodes-deso — Credential Setup</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: #0f1015;
+      color: #e4e4e7;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    .container {
+      max-width: 640px;
+      margin: 0 auto;
+      padding: 48px 24px;
+      width: 100%;
+    }
+    header {
+      margin-bottom: 40px;
+    }
+    header h1 {
+      font-size: 24px;
+      font-weight: 600;
+      color: #fff;
+    }
+    header p {
+      color: #a1a1aa;
+      margin-top: 6px;
+      font-size: 14px;
+    }
+    .steps {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+    .step {
+      background: #18181b;
+      border: 1px solid #27272a;
+      border-radius: 10px;
+      padding: 24px;
+    }
+    .step-num {
+      display: inline-block;
+      width: 28px;
+      height: 28px;
+      line-height: 28px;
+      text-align: center;
+      border-radius: 50%;
+      background: #3b82f6;
+      color: #fff;
+      font-weight: 600;
+      font-size: 14px;
+      margin-bottom: 10px;
+    }
+    .step h2 {
+      font-size: 16px;
+      font-weight: 600;
+      color: #fff;
+      margin-bottom: 6px;
+    }
+    .step p {
+      font-size: 14px;
+      color: #a1a1aa;
+      line-height: 1.6;
+    }
+    .btn {
+      display: inline-block;
+      margin-top: 14px;
+      padding: 10px 20px;
+      background: #3b82f6;
+      color: #fff;
+      text-decoration: none;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 14px;
+      transition: background 0.2s;
+    }
+    .btn:hover {
+      background: #2563eb;
+    }
+    .btn.ghost {
+      background: transparent;
+      border: 1px solid #3f3f46;
+      color: #d4d4d8;
+    }
+    .btn.ghost:hover {
+      background: #27272a;
+    }
+    code {
+      background: #27272a;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 13px;
+      color: #fbbf24;
+    }
+    .field-list {
+      margin-top: 10px;
+    }
+    .field-list dt {
+      font-weight: 600;
+      font-size: 13px;
+      color: #d4d4d8;
+      margin-top: 10px;
+    }
+    .field-list dd {
+      font-size: 13px;
+      color: #a1a1aa;
+      margin-left: 0;
+    }
+    footer {
+      margin-top: 48px;
+      padding-top: 16px;
+      border-top: 1px solid #27272a;
+      text-align: center;
+      font-size: 12px;
+      color: #52525b;
+    }
+    footer a {
+      color: #71717a;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>n8n-nodes-deso</h1>
+      <p>Set up a DeSo Identity credential for your n8n workflows.</p>
+    </header>
+
+    <div class="steps">
+      <div class="step">
+        <span class="step-num">1</span>
+        <h2>Install the DeSo Identity extension</h2>
+        <p>You need the <a href="https://identity.deso.org" style="color:#3b82f6;">DeSo Identity browser extension</a> installed in your browser. It stores your wallet keys securely and handles signing.</p>
+      </div>
+
+      <div class="step">
+        <span class="step-num">2</span>
+        <h2>Get your credential payload</h2>
+        <p>Open the DeSo Auth Page in the browser that has the Identity extension. Click <strong>Connect DeSo Wallet</strong>, complete the authorization, then copy the credential payload.</p>
+        <a class="btn" href="https://csmediapro.github.io/n8n-nodes-deso/auth/" target="_blank">
+          Open DeSo Auth Page →
+        </a>
+      </div>
+
+      <div class="step">
+        <span class="step-num">3</span>
+        <h2>Paste into n8n</h2>
+        <p>In your n8n <strong>DeSo Identity API</strong> credential, paste the entire JSON payload into the <code>Credential Payload</code> field. Save the credential — you're done.</p>
+        <a class="btn ghost" href="https://github.com/csmediapro/n8n-nodes-deso/blob/main/README.md" target="_blank">
+          Full README →
+        </a>
+      </div>
+    </div>
+
+    <footer>
+      Built by <a href="https://csmediapro.com">CSMediaPro</a> ·
+      <a href="https://github.com/csmediapro/n8n-nodes-deso">GitHub</a>
+    </footer>
+  </div>
+</body>
+</html>

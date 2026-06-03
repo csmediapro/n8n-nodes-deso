@@ -8,73 +8,21 @@ export class DesoIdentityApi implements ICredentialType {
 
   displayName = 'DeSo Identity API';
 
-  documentationUrl = 'https://github.com/csmediapro/n8n-nodes-deso';
+  documentationUrl = 'https://csmediapro.github.io/n8n-nodes-deso/';
 
   properties: INodeProperties[] = [
     {
-      displayName: 'Open the DeSo Auth Page in your browser, connect your wallet, then paste the credential payload here.',
-      name: 'notice',
-      type: 'notice',
-      default: '',
-    },
-    {
-      displayName: 'Auth Page URL',
-      name: 'authPageUrl',
-      type: 'string',
-      default: 'https://csmediapro.github.io/n8n-nodes-deso/auth/',
-      description: 'Open this URL in a browser with the DeSo Identity extension',
-    },
-    {
       displayName: 'Credential Payload',
       name: 'credentialPayload',
+      required: true,
       type: 'string',
       typeOptions: {
-        rows: 8,
+        rows: 6,
       },
       default: '',
-      description: 'Paste the full credential payload from the DeSo Auth Page',
-    },
-    {
-      displayName: 'Public Key',
-      name: 'publicKey',
-      type: 'string',
-      typeOptions: {
-        password: true,
-      },
-      default: '',
-      description: 'Your DeSo public key',
-    },
-    {
-      displayName: 'JWT',
-      name: 'jwt',
-      type: 'string',
-      typeOptions: {
-        password: true,
-        alwaysOpenEditWindow: true,
-      },
-      default: '',
-      description: 'JWT token from DeSo Identity',
-    },
-    {
-      displayName: 'Derived Key',
-      name: 'derivedKey',
-      type: 'string',
-      typeOptions: {
-        password: true,
-      },
-      default: '',
-      description: 'Derived key for signing transactions',
-    },
-    {
-      displayName: 'DeSo Identity Storage',
-      name: 'identityStorageJson',
-      type: 'string',
-      typeOptions: {
-        password: true,
-        rows: 4,
-      },
-      default: '',
-      description: 'DeSo Identity authorization data',
+      description:
+        'Paste the full JSON credential payload from the DeSo Auth Page' +
+        ' (<a href="https://csmediapro.github.io/n8n-nodes-deso/auth/" target="_blank">open auth page</a>)',
     },
     {
       displayName: 'Node URL',
@@ -95,7 +43,7 @@ export class DesoIdentityApi implements ICredentialType {
       name: 'profileUsername',
       type: 'string',
       default: '',
-      description: 'Your DeSo username',
+      description: 'Your DeSo username (optional — auto-filled from payload at runtime)',
     },
   ];
 }
