@@ -116,6 +116,38 @@
       color: #a1a1aa;
       margin-left: 0;
     }
+    .section {
+      margin-top: 32px;
+    }
+    .section h2 {
+      font-size: 18px;
+      font-weight: 600;
+      color: #fff;
+      margin-bottom: 14px;
+    }
+    .guide {
+      border-top: 1px solid #27272a;
+      padding: 16px 0;
+    }
+    .guide:first-of-type {
+      border-top: 0;
+      padding-top: 0;
+    }
+    .guide h3 {
+      font-size: 15px;
+      color: #fff;
+      margin-bottom: 6px;
+    }
+    .guide p,
+    .guide li {
+      font-size: 14px;
+      color: #a1a1aa;
+      line-height: 1.6;
+    }
+    .guide ol,
+    .guide ul {
+      margin: 8px 0 0 18px;
+    }
     footer {
       margin-top: 48px;
       padding-top: 16px;
@@ -162,7 +194,37 @@
       </div>
     </div>
 
+    <section class="section">
+      <h2>Using the DeSo node</h2>
+
+      <div class="guide">
+        <h3>Name each credential</h3>
+        <p>Use n8n's credential name to tell accounts apart, such as <code>DeSo - Main</code> or <code>DeSo - Brand</code>. If n8n creates a generic name, rename it from <strong>Settings → Credentials</strong>.</p>
+      </div>
+
+      <div class="guide">
+        <h3>Text post</h3>
+        <p>Add a DeSo node, choose the <strong>Post</strong> operation, select your credential, enter <strong>Post Text</strong>, and leave <strong>Image</strong> set to <code>None</code>.</p>
+      </div>
+
+      <div class="guide">
+        <h3>Image from a previous node</h3>
+        <p>Use this for images coming from a webhook, chat app, form upload, HTTP Request node, or agent workflow.</p>
+        <ol>
+          <li>Connect the image-producing node to the DeSo node.</li>
+          <li>Set <strong>Image</strong> to <code>From Previous Node</code>.</li>
+          <li>Set <strong>Image Field</strong> to the binary field name. Most n8n nodes use <code>data</code>.</li>
+        </ol>
+      </div>
+
+      <div class="guide">
+        <h3>Image from a URL</h3>
+        <p>Set <strong>Image</strong> to <code>From URL</code>, paste a public image URL into <strong>Image URL</strong>, then run the node.</p>
+      </div>
+    </section>
+
     <footer>
+      <p>Privacy note: This auth page runs in your browser. It does not save, log, or transmit your DeSo credentials to CSMediaPro.</p>
       Built by <a href="https://csmediapro.com">CSMediaPro</a> ·
       <a href="https://github.com/csmediapro/n8n-nodes-deso">GitHub</a>
     </footer>

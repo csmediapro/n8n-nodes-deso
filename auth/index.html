@@ -77,6 +77,12 @@
     }
     .copy-btn:hover { background: #334155; }
     .copy-btn.copied { background: #065f46; }
+    .privacy-note {
+      margin-top: 1.25rem;
+      margin-bottom: 0;
+      color: #64748b;
+      font-size: 0.75rem;
+    }
   </style>
 </head>
 <body>
@@ -100,12 +106,16 @@
         📋 Copy to Clipboard
       </button>
       <p class="step" style="margin-top: 1rem;">
-        2. Go back to n8n and paste it into the <strong>DeSo Auth Page</strong> field in your credential.
+        2. Go back to n8n and paste it into the <strong>Credential Payload</strong> field.
       </p>
       <p class="step">
-        3. The remaining credential fields will populate automatically.
+        3. Save the credential and use it in your DeSo node.
       </p>
     </div>
+
+    <p class="privacy-note">
+      Privacy note: This page runs in your browser. It does not save, log, or transmit your DeSo credentials to CSMediaPro.
+    </p>
   </div>
 
   <script src="deso-protocol.bundle.js"></script>

@@ -14,7 +14,7 @@ export class Deso implements INodeType {
     group: ['output'],
     version: 1,
     subtitle: '={{$parameter["operation"]}}',
-    description: 'Post to DeSo and get DeSo profiles',
+    description: 'Publish DeSo posts and look up DeSo profiles',
     defaults: {
       name: 'DeSo',
     },
@@ -36,7 +36,7 @@ export class Deso implements INodeType {
           {
             name: 'Post',
             value: 'post',
-            description: 'Create and publish a post on DeSo',
+            description: 'Publish a text post, with an optional image, to DeSo',
             action: 'Post to DeSo',
           },
           {
@@ -51,7 +51,7 @@ export class Deso implements INodeType {
 
       // -- Post --
       {
-        displayName: 'Post Body',
+        displayName: 'Post Text',
         name: 'postBody',
         type: 'string',
         typeOptions: {
@@ -64,7 +64,7 @@ export class Deso implements INodeType {
             operation: ['post'],
           },
         },
-        description: 'The text content of your DeSo post',
+        description: 'Text to publish in the DeSo post',
       },
       {
         displayName: 'Image',
@@ -76,7 +76,7 @@ export class Deso implements INodeType {
             value: 'none',
           },
           {
-            name: 'From Previous Node (Binary)',
+            name: 'From Previous Node',
             value: 'binary',
           },
           {
@@ -90,10 +90,10 @@ export class Deso implements INodeType {
             operation: ['post'],
           },
         },
-        description: 'Attach an image to the post from binary data or a URL',
+        description: 'Optionally attach an image from the previous node or from a public URL',
       },
       {
-        displayName: 'Input Binary Field',
+        displayName: 'Image Field',
         name: 'binaryPropertyName',
         type: 'string',
         default: 'data',
@@ -104,7 +104,7 @@ export class Deso implements INodeType {
             imageSource: ['binary'],
           },
         },
-        description: 'Name of the binary field from the previous node (default: data)',
+        description: 'Binary field that contains the image from the previous node. Most n8n image nodes use data.',
       },
       {
         displayName: 'Image URL',
@@ -117,7 +117,7 @@ export class Deso implements INodeType {
             imageSource: ['url'],
           },
         },
-        description: 'Existing image URL to attach to the DeSo post',
+        description: 'Public image URL to attach to the DeSo post',
       },
       {
         displayName: 'Include Image URL in Post Text',
@@ -130,7 +130,7 @@ export class Deso implements INodeType {
             imageSource: ['binary', 'url'],
           },
         },
-        description: 'Whether to append the image URL to the end of your post body',
+        description: 'Whether to also add the image URL as plain text at the end of the post',
       },
 
       // -- Get Profile --
@@ -144,7 +144,7 @@ export class Deso implements INodeType {
             operation: ['getProfile'],
           },
         },
-        description: 'Public key or username to look up. Leave blank to use your own profile.',
+        description: 'Public key or username to look up. Leave empty to use the selected credential account.',
       },
     ],
   };

@@ -21,7 +21,7 @@ export class DesoIdentityApi implements ICredentialType {
       },
       default: '',
       description:
-        'Paste the full JSON credential payload from the DeSo Auth Page' +
+        'Paste the full JSON credential payload from the DeSo Auth Page.' +
         ' (<a href="https://csmediapro.github.io/n8n-nodes-deso/auth/" target="_blank">open auth page</a>)',
     },
     {
@@ -29,14 +29,14 @@ export class DesoIdentityApi implements ICredentialType {
       name: 'nodeUri',
       type: 'string',
       default: 'https://node.deso.org',
-      description: 'DeSo blockchain node to connect to',
+      description: 'DeSo node used for profile lookup, image upload, and post publishing',
     },
     {
       displayName: 'Spending Limit (Nanos)',
       name: 'spendingLimitNanos',
       type: 'number',
       default: 10000000,
-      description: 'Maximum nanos authorized per transaction (10000000 = 0.01 DESO)',
+      description: 'Maximum DESO spend authorized for this credential, in nanos. 10000000 = 0.01 DESO.',
     },
   ];
 }

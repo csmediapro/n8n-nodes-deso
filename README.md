@@ -2,13 +2,13 @@
 
 Community node for publishing to the [DeSo](https://deso.org) blockchain from [n8n](https://n8n.io) workflows.
 
-Connect your DeSo wallet via DeSo Identity, copy the credential payload into n8n, then publish text posts, attach images, and look up DeSo profiles from workflows.
+Connect your DeSo wallet via DeSo Identity, copy the credential payload into n8n, then publish text posts, attach images, and look up DeSo profiles from your workflows.
 
 ## Features
 
 - **DeSo Identity credentials** — connect a DeSo wallet from any browser that has the DeSo Identity browser extension installed.
 - **Post to DeSo** — publish public text posts with the selected credential.
-- **Image posts** — attach an existing image URL or upload image binary data from your workflow.
+- **Image posts** — attach an existing image URL or use image binary data from a previous workflow node.
 - **Profile lookup** — fetch a DeSo profile by username or public key.
 - **Multiple accounts** — create one credential per DeSo wallet and pick the right one per node instance.
 
@@ -42,15 +42,16 @@ Each DeSo Identity credential represents one DeSo wallet/account. You need the [
 
 3. Click **Connect DeSo Wallet** and complete the DeSo Identity authorization flow.
 4. Copy the credential payload that appears (click **Copy to Clipboard**).
-5. In n8n, paste the payload into the **DeSo Auth Page** field in the credential.
-6. The remaining fields (Public Key, JWT, Derived Key, Identity Storage, Username) will populate automatically.
-7. Save the credential.
+5. In n8n, paste the full JSON payload into the **Credential Payload** field.
+6. Leave **Node URL** as `https://node.deso.org` unless you intentionally use another DeSo node.
+7. Leave **Spending Limit (Nanos)** at the default unless you need a different DeSo Identity spending limit.
+8. Save the credential.
 
-> n8n encrypts all credential fields at rest. The auth page does not send your credential data anywhere — it runs entirely in your browser and only displays it for you to copy.
+> n8n encrypts credential fields at rest. The auth page runs in your browser and does not save, log, or transmit your DeSo credentials to CSMediaPro.
 
 ### Multiple DeSo Accounts
 
-Create a separate credential for each DeSo account:
+Create a separate credential for each DeSo account and name each credential clearly in n8n:
 
 ```text
 DeSo - Main Account
@@ -59,6 +60,8 @@ DeSo - Test Account
 ```
 
 Each node instance uses whichever credential you select. Accounts do not share auth state.
+
+If n8n creates a generic name such as `DeSo Identity account`, rename it from **Settings → Credentials** using the credential list menu.
 
 ## Operations
 
@@ -70,11 +73,35 @@ Publishes a public DeSo post.
 
 | Field | Description |
 |-------|-------------|
-| Post Body | Text content of the post |
-| Image Source | `None`, `Binary Data`, or `Image URL` |
-| Binary Property | Name of the incoming binary field (default: `data`) |
+| Post Text | Text content of the post |
+| Image | `None`, `From Previous Node`, or `From URL` |
+| Image Field | Binary field from the previous node that contains the image. Most n8n image/file nodes use `data`. |
 | Image URL | URL of an existing image to attach |
-| Append Image URL to Body | Append the uploaded image URL to the post body text |
+| Include Image URL in Post Text | Also append the image URL as plain text at the end of the post |
+
+#### Text Post
+
+For a plain text post, set **Post Text** and leave **Image** as `None`.
+
+#### Image Post From a Previous Node
+
+Use this when a workflow starts with an image from a webhook, chat app, form upload, HTTP Request node, or another n8n node.
+
+1. Add a node before DeSo that outputs the image as binary data.
+2. Connect that node to the DeSo node.
+3. In the DeSo node, set **Image** to `From Previous Node`.
+4. Set **Image Field** to the binary field name from the previous node. The default is usually `data`.
+5. Set **Post Text** and run the node.
+
+The DeSo node uploads the binary image first, then attaches the resulting image URL to the DeSo post.
+
+#### Image Post From a URL
+
+Use this when you already have a public image URL.
+
+1. Set **Image** to `From URL`.
+2. Paste the URL into **Image URL**.
+3. Set **Post Text** and run the node.
 
 **Output**
 
@@ -109,15 +136,18 @@ Fetches a DeSo profile by public key or username. Leave the input blank to fetch
 }
 ```
 
-## Image Posting
+## Image Notes
 
-When using binary image data, the node uploads the image to DeSo's image endpoint before submitting the post. The image URL is automatically attached to the post — no need to upload images separately.
+When using binary image data, the node uploads the image to DeSo's image endpoint before submitting the post. The image URL is automatically attached to the post, so you do not need to upload images separately.
+
+For best compatibility, keep images at or below 10 MB.
 
 ## Security
 
 - DeSo posts are public.
 - The credential payload contains derived signing material — treat it like a password.
 - Workflow output never includes the JWT, seed, or raw credential payload.
+- The auth page runs client-side in your browser and does not save, log, or transmit your DeSo credentials to CSMediaPro.
 - Revoke derived keys through [DeSo Identity](https://identity.deso.org) if a credential is exposed.
 
 ## Development
