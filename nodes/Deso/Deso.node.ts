@@ -67,7 +67,7 @@ export class Deso implements INodeType {
         description: 'The text content of your DeSo post',
       },
       {
-        displayName: 'Image Source',
+        displayName: 'Image',
         name: 'imageSource',
         type: 'options',
         options: [
@@ -76,11 +76,11 @@ export class Deso implements INodeType {
             value: 'none',
           },
           {
-            name: 'Binary Data',
+            name: 'From Previous Node (Binary)',
             value: 'binary',
           },
           {
-            name: 'Image URL',
+            name: 'From URL',
             value: 'url',
           },
         ],
@@ -90,10 +90,10 @@ export class Deso implements INodeType {
             operation: ['post'],
           },
         },
-        description: 'Where to get the image attached to the DeSo post',
+        description: 'Attach an image to the post from binary data or a URL',
       },
       {
-        displayName: 'Binary Property',
+        displayName: 'Input Binary Field',
         name: 'binaryPropertyName',
         type: 'string',
         default: 'data',
@@ -104,7 +104,7 @@ export class Deso implements INodeType {
             imageSource: ['binary'],
           },
         },
-        description: 'Name of the incoming binary property containing the image',
+        description: 'Name of the binary field from the previous node (default: data)',
       },
       {
         displayName: 'Image URL',
@@ -120,7 +120,7 @@ export class Deso implements INodeType {
         description: 'Existing image URL to attach to the DeSo post',
       },
       {
-        displayName: 'Append Image URL to Body',
+        displayName: 'Include Image URL in Post Text',
         name: 'appendImageUrlToBody',
         type: 'boolean',
         default: false,
@@ -130,7 +130,7 @@ export class Deso implements INodeType {
             imageSource: ['binary', 'url'],
           },
         },
-        description: 'Whether to append the final image URL to the post body text',
+        description: 'Whether to append the image URL to the end of your post body',
       },
 
       // -- Get Profile --

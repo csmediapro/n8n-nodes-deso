@@ -38,12 +38,5 @@ export class DesoIdentityApi implements ICredentialType {
       default: 10000000,
       description: 'Maximum nanos authorized per transaction (10000000 = 0.01 DESO)',
     },
-    {
-      displayName: 'Profile Username',
-      name: 'profileUsername',
-      type: 'string',
-      default: '',
-      description: 'Your DeSo username (optional — auto-filled from payload at runtime)',
-    },
   ];
 }
