@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-deso",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "n8n community node for DeSo Identity authentication, image posting, and profile lookup",
   "keywords": [
     "n8n-community-node-package",
