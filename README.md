@@ -2,7 +2,7 @@
 
 Community node for publishing to the [DeSo](https://deso.org) blockchain from [n8n](https://n8n.io) workflows.
 
-Connect your DeSo wallet via DeSo Identity, copy the credential payload into n8n, then publish text posts, attach images, and look up DeSo profiles from your workflows.
+Connect your DeSo wallet, publish text posts with images, and look up DeSo profiles — all directly from n8n workflows.
 
 ## Features
 
@@ -24,7 +24,7 @@ For manual installs:
 
 ```bash
 cd ~/.n8n/nodes
-npm install n8n-nodes-deso
+npm install n8n-nodes-deso --legacy-peer-deps
 ```
 
 Restart n8n after installing.
