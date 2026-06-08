@@ -1,4 +1,5 @@
 import type {
+  IAuthenticateGeneric,
   ICredentialTestRequest,
   ICredentialType,
   INodeProperties,
@@ -12,6 +13,13 @@ export class DesoIdentityApi implements ICredentialType {
   icon = 'file:logo.svg' as const;
 
   documentationUrl = 'https://csmediapro.github.io/n8n-nodes-deso/';
+
+  authenticate: IAuthenticateGeneric = {
+    type: 'generic',
+    properties: {
+      headers: {},
+    },
+  };
 
   test: ICredentialTestRequest = {
     request: {
