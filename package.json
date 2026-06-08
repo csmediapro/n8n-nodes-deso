@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-deso",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "n8n community node for DeSo Identity authentication, image posting, and profile lookup",
   "keywords": [
     "n8n-community-node-package",
@@ -15,6 +15,7 @@
   "license": "MIT",
   "author": {
     "name": "CSMediaPro",
+    "email": "contact@csmediapro.com",
     "url": "https://csmediapro.com"
   },
   "homepage": "https://csmediapro.com",
