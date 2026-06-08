@@ -1,4 +1,5 @@
 import type {
+  ICredentialTestRequest,
   ICredentialType,
   INodeProperties,
 } from 'n8n-workflow';
@@ -12,7 +13,7 @@ export class DesoIdentityApi implements ICredentialType {
 
   documentationUrl = 'https://csmediapro.github.io/n8n-nodes-deso/';
 
-  test = {
+  test: ICredentialTestRequest = {
     request: {
       baseURL: '={{$credentials.nodeUri}}',
       url: '/api/v0/get-exchange-rate',
