@@ -16,8 +16,6 @@ export class DesoIdentityApi implements ICredentialType {
     request: {
       baseURL: '={{$credentials.nodeUri}}',
       url: '/api/v0/get-exchange-rate',
-      method: 'POST' as const,
-      body: {},
     },
   };
 
