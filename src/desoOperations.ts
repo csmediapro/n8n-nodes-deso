@@ -1,4 +1,10 @@
-import { buildProfilePictureUrl, configure, getSingleProfile, identity, submitPost } from 'deso-protocol';
+import {
+  buildProfilePictureUrl,
+  configure,
+  getSingleProfile,
+  identity,
+  submitPost,
+} from './vendor/deso-protocol.cjs';
 
 export const DEFAULT_NODE_URI = 'https://node.deso.org';
 
@@ -172,14 +178,15 @@ export async function postToDeso(raw: DesoCredentials, input: PostToDesoInput): 
     MinFeeRateNanosPerKB: DEFAULT_MIN_FEE_RATE_NANOS_PER_KB,
   });
 
-  const submitted = response.submittedTransactionResponse as Record<string, any> | undefined;
-  const constructed = response.constructedTransactionResponse as Record<string, any> | undefined;
-  const postEntry = submitted?.PostEntryResponse as Record<string, any> | undefined;
+  const submitted = asRecord(response.submittedTransactionResponse);
+  const constructed = asRecord(response.constructedTransactionResponse);
+  const postEntry = asRecord(submitted?.PostEntryResponse);
+  const profileEntry = asRecord(postEntry?.ProfileEntryResponse);
   const postHash = postEntry?.PostHashHex || submitted?.PostHashHex || constructed?.PostHashHex;
   const txnHash = submitted?.TxnHashHex || submitted?.TransactionHashHex || constructed?.TxnHashHex;
 
   return {
-    postedAs: credentials.profileUsername || postEntry?.ProfileEntryResponse?.Username || null,
+    postedAs: credentials.profileUsername || profileEntry?.Username || null,
     publicKey,
     postHash,
     txnHash,
@@ -258,13 +265,19 @@ function trimTrailingSlash(value: string): string {
   return value.replace(/\/+$/, '');
 }
 
-function installBrowserBase64Shim(): void {
-  const globalWithWindow = globalThis as typeof globalThis & {
-    window?: {
-      btoa?: (value: string) => string;
-      atob?: (value: string) => string;
-    };
+function asRecord(value: unknown): Record<string, unknown> | undefined {
+  return value && typeof value === 'object' ? value as Record<string, unknown> : undefined;
+}
+
+interface BrowserShimGlobal {
+  window?: {
+    btoa?: (value: string) => string;
+    atob?: (value: string) => string;
   };
+}
+
+function installBrowserBase64Shim(): void {
+  const globalWithWindow = Function('return this')() as BrowserShimGlobal;
 
   globalWithWindow.window ??= {};
   globalWithWindow.window.btoa ??= (value: string) => Buffer.from(value, 'binary').toString('base64');

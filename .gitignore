@@ -6,3 +6,4 @@ dist/
 .DS_Store
 .deso-storage/
 auth/deso-protocol.bundle.js
+src/vendor/deso-protocol.cjs

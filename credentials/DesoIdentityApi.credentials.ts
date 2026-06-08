@@ -8,7 +8,18 @@ export class DesoIdentityApi implements ICredentialType {
 
   displayName = 'DeSo Identity API';
 
+  icon = 'file:logo.svg' as const;
+
   documentationUrl = 'https://csmediapro.github.io/n8n-nodes-deso/';
+
+  test = {
+    request: {
+      baseURL: '={{$credentials.nodeUri}}',
+      url: '/api/v0/get-exchange-rate',
+      method: 'POST' as const,
+      body: {},
+    },
+  };
 
   properties: INodeProperties[] = [
     {
@@ -17,6 +28,7 @@ export class DesoIdentityApi implements ICredentialType {
       required: true,
       type: 'string',
       typeOptions: {
+        password: true,
         rows: 6,
       },
       default: '',

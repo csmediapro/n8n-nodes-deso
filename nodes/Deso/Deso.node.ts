@@ -3,6 +3,11 @@ import type {
   INodeTypeDescription,
   INodeExecutionData,
   IExecuteFunctions,
+  IDataObject,
+} from 'n8n-workflow';
+import {
+  NodeConnectionTypes,
+  NodeOperationError,
 } from 'n8n-workflow';
 import { getDesoProfile, postToDeso, uploadImageToDeso } from '../../src/desoOperations';
 
@@ -15,11 +20,12 @@ export class Deso implements INodeType {
     version: 1,
     subtitle: '={{$parameter["operation"]}}',
     description: 'Publish DeSo posts and look up DeSo profiles',
+    usableAsTool: true,
     defaults: {
       name: 'DeSo',
     },
-    inputs: ['main'],
-    outputs: ['main'],
+    inputs: [NodeConnectionTypes.Main],
+    outputs: [NodeConnectionTypes.Main],
     credentials: [
       {
         name: 'desoIdentityApi',
@@ -34,16 +40,16 @@ export class Deso implements INodeType {
         noDataExpression: true,
         options: [
           {
-            name: 'Post',
-            value: 'post',
-            description: 'Publish a text post, with an optional image, to DeSo',
-            action: 'Post to DeSo',
-          },
-          {
             name: 'Get Profile',
             value: 'getProfile',
             description: 'Get profile information for a DeSo user',
-            action: 'Get DeSo profile',
+            action: 'Get deso profile',
+          },
+          {
+            name: 'Post',
+            value: 'post',
+            description: 'Publish a text post, with an optional image, to DeSo',
+            action: 'Post to deso',
           },
         ],
         default: 'post',
@@ -72,16 +78,16 @@ export class Deso implements INodeType {
         type: 'options',
         options: [
           {
-            name: 'None',
-            value: 'none',
-          },
-          {
             name: 'From Previous Node',
             value: 'binary',
           },
           {
             name: 'From URL',
             value: 'url',
+          },
+          {
+            name: 'None',
+            value: 'none',
           },
         ],
         default: 'none',
@@ -157,7 +163,7 @@ export class Deso implements INodeType {
 
     for (let i = 0; i < items.length; i++) {
       try {
-        let result: any;
+        let result: IDataObject;
 
         switch (operation) {
           case 'post': {
@@ -189,25 +195,29 @@ export class Deso implements INodeType {
               ? `${postBody.trim()}\n\n${imageUrls[0]}`
               : postBody;
 
-            result = await postToDeso(credentials, { body, imageUrls });
+            result = await postToDeso(credentials, { body, imageUrls }) as IDataObject;
             break;
           }
           case 'getProfile': {
             const profileUser = this.getNodeParameter('profileUser', i, '') as string;
-            result = await getDesoProfile(credentials, { user: profileUser });
+            result = await getDesoProfile(credentials, { user: profileUser }) as IDataObject;
             break;
           }
           default:
-            throw new Error(`Unknown operation: ${operation}`);
+            throw new NodeOperationError(this.getNode(), `Unknown operation: ${operation}`, { itemIndex: i });
         }
 
-        returnData.push({ json: result });
+        returnData.push({ json: result, pairedItem: { item: i } });
       } catch (error) {
         if (this.continueOnFail()) {
-          returnData.push({ json: { error: (error as Error).message } });
+          returnData.push({
+            json: { error: error instanceof Error ? error.message : String(error) },
+            pairedItem: { item: i },
+          });
           continue;
         }
-        throw error;
+        const message = error instanceof Error ? error.message : String(error);
+        throw new NodeOperationError(this.getNode(), message, { itemIndex: i });
       }
     }
 

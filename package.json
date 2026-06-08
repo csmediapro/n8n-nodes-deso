@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-deso",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "n8n community node for DeSo Identity authentication, image posting, and profile lookup",
   "keywords": [
     "n8n-community-node-package",
@@ -35,32 +35,37 @@
   "n8n": {
     "n8nNodesApiVersion": 1,
     "credentials": [
-      "dist/credentials/DesoIdentityApi.js"
+      "dist/credentials/DesoIdentityApi.credentials.js"
     ],
     "nodes": [
       "dist/nodes/Deso/Deso.node.js"
     ]
   },
   "scripts": {
-    "build": "tsc",
+    "build": "npm run bundle-deso-protocol:src && n8n-node build && npm run bundle-deso-protocol:dist",
     "bundle-auth": "esbuild node_modules/deso-protocol/src/index.js --bundle --format=iife --global-name=deso --platform=browser --outfile=auth/deso-protocol.bundle.js",
-    "dev": "tsc --watch",
+    "bundle-deso-protocol:src": "esbuild node_modules/deso-protocol/src/index.js --bundle --platform=node --format=cjs --target=node20 --outfile=src/vendor/deso-protocol.cjs",
+    "bundle-deso-protocol:dist": "esbuild node_modules/deso-protocol/src/index.js --bundle --platform=node --format=cjs --target=node20 --outfile=dist/src/vendor/deso-protocol.cjs",
+    "dev": "n8n-node dev",
+    "lint": "n8n-node lint",
+    "lint:fix": "n8n-node lint --fix",
+    "prelint": "npm run bundle-deso-protocol:src",
     "test:profile": "npm run build && node scripts/test-operations.js",
     "test:post": "npm run build && node scripts/test-operations.js --post",
     "test:image-post": "npm run build && node scripts/test-operations.js --post --image",
     "prepublishOnly": "npm run build"
   },
-  "dependencies": {
-    "deso-protocol": "^3.3.7",
-    "n8n-workflow": "^1.0.0"
-  },
   "devDependencies": {
+    "@n8n/node-cli": "^0.33.1",
     "@types/node": "^22.5.5",
+    "deso-protocol": "^3.3.7",
+    "esbuild": "^0.28.0",
+    "eslint": "^9.29.0",
     "n8n-core": "^1.0.0",
+    "n8n-workflow": "^1.0.0",
     "typescript": "^5.5.3"
   },
   "peerDependencies": {
-    "n8n-core": "^1.0.0",
-    "n8n-workflow": "^1.0.0"
+    "n8n-workflow": "*"
   }
 }
