@@ -154,16 +154,18 @@ For best compatibility, keep images at or below 10 MB.
 
 ```bash
 npm install
-npm run build-auth     # bundle DeSo Protocol for the auth page
-npm run build          # compile TypeScript
+npm run build          # bundle the local signer and compile TypeScript
 ```
+
+The DeSo Identity auth page is a static browser page hosted outside the installed n8n node package.
+The n8n runtime does not import or bundle the DeSo browser SDK.
 
 Local validation:
 
 ```bash
 npm run test:profile
 npm run test:post
-IMAGE_PATH=/path/to/image.jpg npm run test:image-post
+DESO_TEST_IMAGE_PATH=/path/to/image.jpg npm run test:image-post
 ```
 
 The post tests create real public DeSo posts.

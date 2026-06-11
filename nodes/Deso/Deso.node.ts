@@ -4,9 +4,12 @@ import type {
   INodeExecutionData,
   IExecuteFunctions,
   IDataObject,
+  IHttpRequestOptions,
+  JsonObject,
 } from 'n8n-workflow';
 import {
   NodeConnectionTypes,
+  NodeApiError,
   NodeOperationError,
 } from 'n8n-workflow';
 import { getDesoProfile, postToDeso, uploadImageToDeso } from '../../src/desoOperations';
@@ -160,6 +163,13 @@ export class Deso implements INodeType {
     const returnData: INodeExecutionData[] = [];
     const credentials = await this.getCredentials('desoIdentityApi');
     const operation = this.getNodeParameter('operation', 0) as string;
+    const httpRequest = async <T = IDataObject>(options: IHttpRequestOptions): Promise<T> => {
+      try {
+        return await this.helpers.httpRequest(options) as T;
+      } catch (error) {
+        throw new NodeApiError(this.getNode(), error as JsonObject);
+      }
+    };
 
     for (let i = 0; i < items.length; i++) {
       try {
@@ -183,7 +193,7 @@ export class Deso implements INodeType {
               const binaryPropertyName = this.getNodeParameter('binaryPropertyName', i, 'data') as string;
               const binaryData = this.helpers.assertBinaryData(i, binaryPropertyName);
               const buffer = await this.helpers.getBinaryDataBuffer(i, binaryPropertyName);
-              const uploadedImageUrl = await uploadImageToDeso(credentials, {
+              const uploadedImageUrl = await uploadImageToDeso(httpRequest, credentials, {
                 data: buffer,
                 fileName: binaryData.fileName || `${binaryPropertyName}.jpg`,
                 mimeType: binaryData.mimeType,
@@ -195,12 +205,12 @@ export class Deso implements INodeType {
               ? `${postBody.trim()}\n\n${imageUrls[0]}`
               : postBody;
 
-            result = await postToDeso(credentials, { body, imageUrls }) as IDataObject;
+            result = await postToDeso(httpRequest, credentials, { body, imageUrls }) as IDataObject;
             break;
           }
           case 'getProfile': {
             const profileUser = this.getNodeParameter('profileUser', i, '') as string;
-            result = await getDesoProfile(credentials, { user: profileUser }) as IDataObject;
+            result = await getDesoProfile(httpRequest, credentials, { user: profileUser }) as IDataObject;
             break;
           }
           default:
@@ -215,6 +225,9 @@ export class Deso implements INodeType {
             pairedItem: { item: i },
           });
           continue;
+        }
+        if (error instanceof NodeApiError) {
+          throw new NodeApiError(this.getNode(), error as unknown as JsonObject, { itemIndex: i });
         }
         const message = error instanceof Error ? error.message : String(error);
         throw new NodeOperationError(this.getNode(), message, { itemIndex: i });

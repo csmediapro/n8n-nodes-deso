@@ -1,12 +1,11 @@
 {
   "name": "n8n-nodes-deso",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "n8n community node for DeSo Identity authentication, image posting, and profile lookup",
   "keywords": [
     "n8n-community-node-package",
     "deso",
     "deso-identity",
-    "deso-protocol",
     "blockchain",
     "decentralized-social",
     "automation",
@@ -30,7 +29,6 @@
   "types": "dist/index.d.ts",
   "files": [
     "dist",
-    "auth",
     "logo.svg"
   ],
   "n8n": {
@@ -43,14 +41,12 @@
     ]
   },
   "scripts": {
-    "build": "npm run bundle-deso-protocol:src && n8n-node build && npm run bundle-deso-protocol:dist",
-    "bundle-auth": "esbuild node_modules/deso-protocol/src/index.js --bundle --format=iife --global-name=deso --platform=browser --outfile=auth/deso-protocol.bundle.js",
-    "bundle-deso-protocol:src": "esbuild node_modules/deso-protocol/src/index.js --bundle --platform=node --format=cjs --target=node20 --outfile=src/vendor/deso-protocol.cjs",
-    "bundle-deso-protocol:dist": "esbuild node_modules/deso-protocol/src/index.js --bundle --platform=node --format=cjs --target=node20 --outfile=dist/src/vendor/deso-protocol.cjs",
+    "build": "npm run bundle-deso-signing:src && n8n-node build && npm run bundle-deso-signing:dist",
+    "bundle-deso-signing:src": "esbuild tools/desoSigningBundle.ts --bundle --platform=node --format=cjs --target=node20 --outfile=src/vendor/deso-signing.cjs",
+    "bundle-deso-signing:dist": "esbuild tools/desoSigningBundle.ts --bundle --platform=node --format=cjs --target=node20 --outfile=dist/src/vendor/deso-signing.cjs",
     "dev": "n8n-node dev",
     "lint": "n8n-node lint",
     "lint:fix": "n8n-node lint --fix",
-    "prelint": "npm run bundle-deso-protocol:src",
     "test:profile": "npm run build && node scripts/test-operations.js",
     "test:post": "npm run build && node scripts/test-operations.js --post",
     "test:image-post": "npm run build && node scripts/test-operations.js --post --image",
@@ -58,8 +54,9 @@
   },
   "devDependencies": {
     "@n8n/node-cli": "^0.33.1",
+    "@noble/hashes": "^1.8.0",
+    "@noble/secp256k1": "^1.7.2",
     "@types/node": "^22.5.5",
-    "deso-protocol": "^3.3.7",
     "esbuild": "^0.28.0",
     "eslint": "^9.29.0",
     "n8n-core": "^1.0.0",

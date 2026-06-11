@@ -43,9 +43,10 @@ function buildCredential() {
 async function main() {
   const { getDesoProfile, postToDeso, uploadImageToDeso } = require('../dist/src/desoOperations');
   const credential = buildCredential();
+  const httpRequest = createHttpRequest();
 
   console.log('[1/1] Getting selected credential profile...');
-  const profile = await getDesoProfile(credential);
+  const profile = await getDesoProfile(httpRequest, credential);
   console.log(JSON.stringify(profile, null, 2));
 
   if (process.argv.includes('--post')) {
@@ -59,7 +60,7 @@ async function main() {
       }
       const resolvedImagePath = path.resolve(imagePath);
       console.log('\n[image] Uploading image before post...');
-      const imageUrl = await uploadImageToDeso(credential, {
+      const imageUrl = await uploadImageToDeso(httpRequest, credential, {
         data: fs.readFileSync(resolvedImagePath),
         fileName: path.basename(resolvedImagePath),
         mimeType: guessMimeType(resolvedImagePath),
@@ -72,9 +73,38 @@ async function main() {
 This is a controlled public test post from scripts/test-operations.js. ${new Date().toISOString()}`;
 
     console.log('\n[post] Submitting controlled public test post...');
-    const result = await postToDeso(credential, { body, imageUrls });
+    const result = await postToDeso(httpRequest, credential, { body, imageUrls });
     console.log(JSON.stringify(result, null, 2));
   }
+}
+
+function createHttpRequest() {
+  return async function httpRequest(options) {
+    const headers = { ...(options.headers || {}) };
+    let body = options.body;
+
+    if (options.json && body && !(body instanceof FormData)) {
+      headers['Content-Type'] = 'application/json';
+      body = JSON.stringify(body);
+    }
+
+    const response = await fetch(options.url, {
+      method: options.method,
+      headers,
+      body,
+    });
+
+    const text = await response.text();
+    const responseBody = text ? JSON.parse(text) : {};
+
+    if (!response.ok) {
+      const error = new Error(responseBody.error || response.statusText);
+      error.response = { status: response.status, body: responseBody };
+      throw error;
+    }
+
+    return responseBody;
+  };
 }
 
 function guessMimeType(filePath) {

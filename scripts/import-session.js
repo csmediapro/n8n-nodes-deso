@@ -3,7 +3,7 @@
  * the file-based storage provider for headless Node.js usage.
  *
  * Usage:
- *   1. Open a browser page that uses deso-protocol and log in via DeSo Identity
+ *   1. Open the DeSo Identity auth page and log in
  *   2. In browser console, generate the JSON string:
  *      JSON.stringify({
  *        desoActivePublicKey: localStorage.getItem('desoActivePublicKey'),
@@ -68,7 +68,7 @@ rl.on('line', (line) => {
         console.log('  ✅ Login key pair imported');
       }
 
-      console.log('\nSession imported! You can now run: node scripts/test-post.js');
+      console.log('\nSession imported! You can now run: node scripts/test-operations.js');
     } catch (e) {
       console.error('Failed to parse JSON:', e.message);
     }

@@ -7,3 +7,4 @@ dist/
 .deso-storage/
 auth/deso-protocol.bundle.js
 src/vendor/deso-protocol.cjs
+src/vendor/deso-signing.cjs
